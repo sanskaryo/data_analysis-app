@@ -17,15 +17,21 @@ st.set_page_config(
     layout="wide"
 )
 
-# Load environment variables
-if os.path.exists(".env"):
-    from dotenv import load_dotenv
-    load_dotenv()
-    groq_api_key = os.getenv("GROQ_API_KEY", "")
-    model_option = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-else:
-    st.error("Please create a .env file with your GROQ_API_KEY and GROQ_MODEL")
-    st.stop()
+# Load environment variables from Streamlit secrets or .env file
+try:
+    # First try to get from Streamlit secrets
+    groq_api_key = st.secrets["GROQ_API_KEY"]
+    model_option = st.secrets.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+except:
+    # If not in secrets, try .env file
+    if os.path.exists(".env"):
+        from dotenv import load_dotenv
+        load_dotenv()
+        groq_api_key = os.getenv("GROQ_API_KEY", "")
+        model_option = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    else:
+        st.error("Please set up your GROQ_API_KEY in Streamlit secrets or create a .env file")
+        st.stop()
 
 # Initialize session states
 if 'messages' not in st.session_state:
